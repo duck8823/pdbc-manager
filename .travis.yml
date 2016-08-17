@@ -4,12 +4,9 @@ perl:
   - "5.20"
   - "5.22"
 
-befor_install:
-  - cpanm Devel::Cover
-  - perl Build.PL
-
-install:
-  - ./Build installdeps
+before_install:
+  - cpanm Devel::Cover Devel::Cover::Report::Coveralls
+  - cpanm --quiet --installdeps --notest .
 
 script:
   - ./Build testcover
