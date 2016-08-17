@@ -19,7 +19,6 @@ use 5.019;
 use Data::Dumper;
 
 use Pdbc;
-use Pdbc::Where;
 
 # ハッシュリファレンスをbless
 my $entity = bless {
