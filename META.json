@@ -1,0 +1,44 @@
+{
+  "abstract" : "blessしたハッシュリファレンスでデータベース操作する.",
+  "author" : [
+	"shunsuke maeda<duck8823@gmail.com>"
+  ],
+  "dynamic_config" : 0,
+  "generated_by" : "author",
+  "license" : [
+	"mit"
+  ],
+  "meta-spec" : {
+	"url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+	"version" : "2"
+  },
+  "name" : "Pdbc::Manager",
+  "no_index" : {
+	"directory" : [
+	  "t"
+	]
+  },
+  "prereqs" : {
+	"configure" : {
+	  "requires" : {
+		"Module::Build" : "0.4220",
+		"DBD::SQLite" : "1.50"
+	  }
+	},
+	"runtime" : {
+	  "requires" : {
+		"perl" : "5.019",
+		"Exporter" : "5.72",
+		"DBI" : "1.636"
+	  }
+	},
+	"test" : {
+	  "requires" : {
+		"Test::More" : "0.98",
+		"Test::Exception" : "0.43"
+	  }
+	}
+  },
+  "release_status" : "unstable",
+  "version" : "0.0.1"
+}
