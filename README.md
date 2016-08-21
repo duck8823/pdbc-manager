@@ -20,38 +20,35 @@ use Data::Dumper;
 
 use Pdbc;
 
-# ハッシュリファレンスをbless
-my $entity = bless {
-	id => 'INTEGER',
-	name => 'TEXT',
-	flg => 'BOOLEAN'
-}, 'Hoge';
+BEGIN {
+	struct 'Hoge', [ 'id', 'name', 'flg' ];
+}
 
 # データベースへの接続
-my $manager = Pdbc::connect('SQLite', 'test.db');
+my $manager = Pdbc::connect('Pg', 'dbname=test;host=localhost', "postgres");
 # テーブルの作成
-$manager->create($entity)->execute();
+$manager->create(Hoge->new('INTEGER', 'TEXT', 'BOOLEAN'))->execute();
 # データの挿入
-$manager->insert(bless {id => 1, name => 'name_1', flg => 1}, 'Hoge')->execute();
-$manager->insert(bless {id => 2, name => 'name_2', flg => undef}, 'Hoge')->execute();
+$manager->insert(Hoge->new(1, 'name_1', 1))->execute();
+$manager->insert(Hoge->new(2, 'name_2', 0))->execute();
 # データの取得（リスト）
-my $rows = $manager->from($entity)->list();
-for my $row (@$rows) {
+my $rows = $manager->from(Hoge)->list();
+for my $row ($rows) {
 	say Dumper $row;
 }
-$manager->from($entity)->where(Pdbc::Where->new('name', 'name', LIKE))->list();
+$manager->from(Hoge)->where( Pdbc::Where->new( 'name', 'name', LIKE ) )->list();
 # データの取得（一意）
-my $row = $manager->from($entity)->where(Pdbc::Where->new('id', 1, EQUAL))->single_result();
+my $row = $manager->from(Hoge)->where( Pdbc::Where->new( 'id', 1, EQUAL ) )->single_result();
 say Dumper $row;
 # データの削除
-$manager->from($entity)->where(Pdbc::Where->new('id', 1, EQUAL))->delete()->execute();
+$manager->from(Hoge)->where( Pdbc::Where->new( 'id', 1, EQUAL ) )->delete()->execute();
 # テーブルの削除
-$manager->drop($entity)->execute();
+$manager->drop(Hoge)->execute();
 # SQLの取得
-my $create_sql = $manager->create($entity)->get_sql();
-my $insert_sql = $manager->insert(bless {id => 1, name => 'name_1', flg => 1}, 'Hoge')->get_sql();
-my $delete_sql = $manager->from($entity)->where(Pdbc::Where->new('id', 1, EQUAL))->delete()->get_sql();
-my $drop_sql   = $manager->drop($entity)->get_sql();
+my $create_sql = $manager->create(Hoge->new('INTEGER', 'TEXT', 'BOOLEAN'))->get_sql();
+my $insert_sql = $manager->insert(Hoge->new(1, 'name_1',1))->get_sql();
+my $delete_sql = $manager->from(Hoge)->where( Pdbc::Where->new( 'id', 1, EQUAL ) )->delete()->get_sql();
+my $drop_sql = $manager->drop(Hoge)->get_sql();
 ```
 
 ## License

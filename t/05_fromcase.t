@@ -5,30 +5,27 @@ use Test::More;
 use Test::Exception;
 
 use Pdbc;
-use Pdbc::Where;
 
-my $test = bless {
-	id => 'INTEGER',
-	name => 'TEXT',
-	flg => 'BOOLEAN'
-}, 'Test';
+BEGIN {
+	struct 'Test', ['id', 'name'];
+}
 
 subtest 'list', sub {
 	my $manager = Pdbc::connect('SQLite', 'test.db');
-	$manager->drop($test)->execute();
-	$manager->create($test)->execute();
+	$manager->drop(Test)->execute();
+	$manager->create(Test->new('INTEGER', 'TEXT'))->execute();
 
-	$manager->insert(bless {id => 1, name => 'name_1', flg => 1}, 'Test')->execute();
-	$manager->insert(bless {id => 2, name => 'name_2', flg => undef}, 'Test')->execute();
+	$manager->insert(Test->new(1, 'name_1'))->execute();
+	$manager->insert(Test->new(2, 'name_2'))->execute();
 
-	my $actual = $manager->from($test)->list();
-	my $expect = [{id => 1, name => 'name_1', flg => 1}, {id => 2, name => 'name_2', flg => ''}];
+	my $actual = $manager->from(Test)->list();
+	my $expect = [{id => 1, name => 'name_1'}, {id => 2, name => 'name_2'}];
 	is scalar(@$actual), 2;
 	is_deeply $actual->[0], $expect->[0];
 	is_deeply $actual->[1], $expect->[1];
 
 	dies_ok sub {
-		$manager->from($test)->where(Pdbc::Where->new('id', {}, EQUAL))->list();
+		$manager->from(Test)->where(Pdbc::Where->new('id', {}, EQUAL))->list();
 	}, 'should die.';
 
 	my $not_exist = bless {
@@ -42,36 +39,36 @@ subtest 'list', sub {
 
 subtest 'single_result', sub {
 	my $manager = Pdbc::connect('SQLite', 'test.db');
-	$manager->drop($test)->execute();
-	$manager->create($test)->execute();
+	$manager->drop(Test)->execute();
+	$manager->create(Test->new('INTEGER', 'TEXT'))->execute();
 
-	$manager->insert(bless {id => 1, name => 'name_1', flg => 1}, 'Test')->execute();
-	$manager->insert(bless {id => 2, name => 'name_2', flg => undef}, 'Test')->execute();
+	$manager->insert(Test->new(1, 'name_1'))->execute();
+	$manager->insert(Test->new(2, 'name_2'))->execute();
 
-	my $actual = $manager->from($test)->where(Pdbc::Where->new('id', 1, EQUAL))->single_result();
-	my $expect = {id => 1, name => 'name_1', flg => 1};
+	my $actual = $manager->from(Test)->where(Pdbc::Where->new('id', 1, EQUAL))->single_result();
+	my $expect = {id => 1, name => 'name_1'};
 	is_deeply$actual, $expect;
 
 	dies_ok sub {
-		$manager->from($test)->where(Pdbc::Where->new('id', {}, EQUAL))->single_result();
+		$manager->from(Test)->where(Pdbc::Where->new('id', {}, EQUAL))->single_result();
 	}, 'should die.';
 
 	dies_ok sub {
-		$manager->from($test)->single_result();
+		$manager->from(Test)->single_result();
 	}, 'should die.';
 };
 
 subtest 'delete', sub {
 	my $manager = Pdbc::connect('SQLite', 'test.db');
-	$manager->drop($test)->execute();
-	$manager->create($test)->execute();
+	$manager->drop(Test)->execute();
+	$manager->create(Test->new('INTEGER', 'TEXT'))->execute();
 
-	$manager->insert(bless {id => 1, name => 'name_1', flg => 1}, 'Test')->execute();
-	$manager->insert(bless {id => 2, name => 'name_2', flg => undef}, 'Test')->execute();
+	$manager->insert(Test->new(1, 'name_1'))->execute();
+	$manager->insert(Test->new(2, 'name_2'))->execute();
 
-	$manager->from($test)->where(Pdbc::Where->new('id', 1, EQUAL))->delete()->execute();
-	my $actual = $manager->from($test)->single_result();
-	my $expect = {id => 2, name => 'name_2', flg => ''};
+	$manager->from(Test)->where(Pdbc::Where->new('id', 1, EQUAL))->delete()->execute();
+	my $actual = $manager->from(Test)->single_result();
+	my $expect = {id => 2, name => 'name_2'};
 	is_deeply $actual, $expect;
 };
 

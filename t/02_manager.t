@@ -9,11 +9,9 @@ use 5.019;
 use Pdbc;
 use Pdbc::Where;
 
-my $test = bless {
-	id   => 'INTEGER',
-	name => 'TEXT',
-	flg  => 'BOOLEAN'
-}, 'Test';
+BEGIN {
+	struct 'Test', ['id', 'name'];
+}
 
 subtest 'connection', sub {
 	my $manager = Pdbc::connect('SQLite', 'test.db');
@@ -22,8 +20,8 @@ subtest 'connection', sub {
 
 subtest 'create', sub {
 	my $manager = Pdbc::connect('SQLite', 'test.db');
-	$manager->drop($test)->execute();
-	$manager->create($test)->execute();
+	$manager->drop(Test)->execute();
+	$manager->create(Test->new('INTEGER', 'TEXT'))->execute();
 
 	my $sth = $manager->{_connection}->prepare('PRAGMA TABLE_INFO(Test)');
 	$sth->execute();
@@ -33,15 +31,15 @@ subtest 'create', sub {
 	while (my $row = shift @$rows) {
 		$table_info->{$row->{name}} = $row->{type};
 	}
-	is_deeply $table_info, {id => 'INTEGER', name => 'TEXT', flg => 'BOOLEAN'};
+	is_deeply $table_info, {id => 'INTEGER', name => 'TEXT'};
 };
 
 subtest 'drop', sub {
 	my $manager = Pdbc::connect('SQLite', 'test.db');
-	$manager->drop($test)->execute();
-	$manager->create($test)->execute();
+	$manager->drop(Test)->execute();
+	$manager->create(Test->new('INTEGER', 'TEXT'))->execute();
 
-	$manager->drop($test)->execute();
+	$manager->drop(Test)->execute();
 
 	my $sth = $manager->{_connection}->prepare('PRAGMA TABLE_INFO(Test)');
 	$sth->execute();
@@ -51,13 +49,13 @@ subtest 'drop', sub {
 
 subtest 'insert', sub {
 	my $manager = Pdbc::connect('SQLite', 'test.db');
-	$manager->drop($test)->execute();
-	$manager->create($test)->execute();
+	$manager->drop(Test)->execute();
+	$manager->create(Test->new('INTEGER', 'TEXT'))->execute();
 
-	$manager->insert(bless {id => 1, name => 'name_1', flg => 1}, 'Test')->execute();
-	$manager->insert(bless {id => 2, name => 'name_2', flg => undef}, 'Test')->execute();
+	$manager->insert(Test->new(1, 'name_1'))->execute();
+	$manager->insert(Test->new(2, 'name_2'))->execute();
 
-	my $expect = [{id => 1, name => 'name_1', flg => 1}, {id => 2, name => 'name_2', flg => ''}];
+	my $expect = [{id => 1, name => 'name_1'}, {id => 2, name => 'name_2'}];
 	my $sth = $manager->{_connection}->prepare('SELECT * FROM Test');
 	$sth->execute();
 	my $actual = $sth->fetchall_arrayref(+{});
@@ -65,49 +63,8 @@ subtest 'insert', sub {
 };
 
 subtest 'create_sentence', sub {
-	my $actual = Pdbc::Manager::_create_sentence(bless {id => 1, name => 'name_1', flg => 1});
-	is $actual, "(flg, id, name) VALUES ('1', '1', 'name_1')";
-};
-
-subtest 'readme', sub {
-	lives_ok {
-	my $dummy = Pdbc::connect('SQLite', 'test.db');
-	$dummy->drop( bless { }, 'Hoge' )->execute();
-
-	# ハッシュリファレンスをbless
-	my $entity = bless {
-			id   => 'INTEGER',
-			name => 'TEXT',
-			flg  => 'BOOLEAN'
-		}, 'Hoge';
-
-	# データベースへの接続
-	my $manager = Pdbc::connect('SQLite', 'test.db');
-	# テーブルの作成
-	$manager->create( $entity )->execute();
-	# データの挿入
-	$manager->insert( bless { id => 1, name => 'name_1', flg => 1 }, 'Hoge' )->execute();
-	$manager->insert( bless { id => 2, name => 'name_2', flg => undef }, 'Hoge' )->execute();
-	# データの取得（リスト）
-	my $rows = $manager->from( $entity )->list();
-	for my $row ($rows) {
-		say $row;
-	}
-	$manager->from( $entity )->where( Pdbc::Where->new( 'name', 'name', LIKE ) )->list();
-	# データの取得（一意）
-	my $row = $manager->from( $entity )->where( Pdbc::Where->new( 'id', 1, EQUAL ) )->single_result();
-	say $row;
-	# データの削除
-	$manager->from( $entity )->where( Pdbc::Where->new( 'id', 1, EQUAL ) )->delete()->execute();
-	# テーブルの削除
-	$manager->drop( $entity )->execute();
-	# SQLの取得
-	my $create_sql = $manager->create( $entity )->get_sql();
-	my $insert_sql = $manager->insert( bless { id => 1, name => 'name_1', flg => 1 }, 'Hoge' )->get_sql();
-	my $delete_sql = $manager->from( $entity )->where( Pdbc::Where->new( 'id', 1,
-			EQUAL ) )->delete()->get_sql();
-	my $drop_sql = $manager->drop( $entity )->get_sql();
-	}, 'should live';
+	my $actual = Pdbc::Manager::_create_sentence(Test->new(1, 'name_1'));
+	is $actual, "(id, name) VALUES ('1', 'name_1')";
 };
 
 done_testing();

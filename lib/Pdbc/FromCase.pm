@@ -25,9 +25,13 @@ sub where($self, $where) {
 }
 
 sub list($self) {
-	my $sth = $self->{_manager}->{_connection}->prepare(sprintf("SELECT %s FROM %s %s", join(', ', keys %{$self->{_entity}}) , ref $self->{_entity}, $self->{_where}->to_string()));
+	my $results;
+	my $sth = $self->{_manager}->{_connection}->prepare(sprintf("SELECT %s FROM %s %s", join(', ', @{$self->{_entity}}) , ref $self->{_entity}, $self->{_where}->to_string()));
 	$sth->execute();
-	return $sth->fetchall_arrayref(+{})
+	for my $result (@{$sth->fetchall_arrayref(+{})}) {
+		push @$results, bless($result, ref($self->{_entity}));
+	}
+	return $results;
 }
 
 sub single_result($self) {

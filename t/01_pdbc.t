@@ -14,7 +14,7 @@ subtest 'new', sub {
 		Pdbc::connect();
 	};
 	dies_ok {
-		Pdbc::connect('SQLite', 'test.db', 'extra');
+		Pdbc::connect('SQLite', 'test.db', 'user', 'password', 'extra');
 	};
 };
 

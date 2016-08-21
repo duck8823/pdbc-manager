@@ -12,12 +12,13 @@ use Pdbc::FromCase;
 use Pdbc::Executable;
 
 
-sub new($pkg, $driver, $datasource) {
+sub new {
+	my ($pkg, $driver, $datasource, $user, $password) = @_;
 	my $self = {
 		_driver => $driver,
 		_datasource => $datasource
 	};
-	$self->{_connection} = DBI->connect("dbi:$self->{_driver}:$self->{_datasource}") or die $!;
+	$self->{_connection} = DBI->connect("dbi:$self->{_driver}:$self->{_datasource}", $user, $password) or die $!;
 	return bless $self, $pkg;
 }
 
@@ -34,7 +35,7 @@ sub create($self, $entity) {
 	for my $column (sort keys %$entity) {
 		my $type = $entity->{$column};
 		grep {$_ eq $type} ('INTEGER', 'TEXT', 'BOOLEAN') or die sprintf("次の型は対応していません. :%s", $type);
-		push @column, sprintf("'%s' %s", $column, $type);
+		push @column, sprintf("%s %s", $column, $type);
 	}
 	return Pdbc::Executable->new($self, sprintf("CREATE TABLE %s (%s)", ref $entity, join(', ', @column)));
 }

@@ -1,13 +1,14 @@
 language: perl
-sudo: false
+services:
+  - postgresql
 perl:
   - "5.20"
   - "5.22"
-
 before_install:
   - cpanm Devel::Cover Devel::Cover::Report::Coveralls
   - cpanm --quiet --installdeps --notest .
-
+before_script:
+  - psql -c 'create database test;' -U postgres
 script:
   - ./Build testcover
   - cover -report coveralls

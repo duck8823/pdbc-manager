@@ -22,7 +22,8 @@
 	"configure" : {
 	  "requires" : {
 		"Module::Build" : "0.4220",
-		"DBD::SQLite" : "1.50"
+		"DBD::SQLite" : "1.50",
+		"DBD::Pg" : "3.5.3"
 	  }
 	},
 	"runtime" : {
