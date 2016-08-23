@@ -3,7 +3,7 @@
 [![Coverage Status](http://coveralls.io/repos/github/duck8823/pdbc-manager/badge.svg?branch=master)](https://coveralls.io/github/duck8823/pdbc-manager?branch=master)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)  
   
-blessしたハッシュリファレンスでデータベースを操作する  
+blessしたリファレンスでデータベースを操作する  
   
 ## INSTALL
 ```sh
@@ -20,6 +20,7 @@ use Data::Dumper;
 
 use Pdbc;
 
+# モジュールを動的に生成
 BEGIN {
 	struct 'Hoge', [ 'id', 'name', 'flg' ];
 }
