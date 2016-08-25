@@ -14,20 +14,19 @@ use Pdbc::Executable;
 
 sub new {
 	my ($pkg, $driver, $datasource, $user, $password) = @_;
+	my $db = DBI->connect("dbi:$driver:$datasource", $user, $password) or die $!;
 	my $self = {
-		_driver => $driver,
-		_datasource => $datasource
+		_db => $db
 	};
-	$self->{_connection} = DBI->connect("dbi:$self->{_driver}:$self->{_datasource}", $user, $password) or die $!;
 	return bless $self, $pkg;
 }
 
 sub from($self, $entity) {
-	return Pdbc::FromCase->new($self, $entity);
+	return Pdbc::FromCase->new($self->{_db}, $entity);
 }
 
 sub drop($self, $entity) {
-	return Pdbc::Executable->new($self, sprintf("DROP TABLE IF EXISTS %s", ref $entity));
+	return Pdbc::Executable->new($self->{_db}, sprintf("DROP TABLE IF EXISTS %s", ref $entity));
 }
 
 sub create($self, $entity) {
@@ -37,11 +36,11 @@ sub create($self, $entity) {
 		grep {$_ eq $type} ('INTEGER', 'TEXT', 'BOOLEAN') or die sprintf("次の型は対応していません. :%s", $type);
 		push @column, sprintf("%s %s", $column, $type);
 	}
-	return Pdbc::Executable->new($self, sprintf("CREATE TABLE %s (%s)", ref $entity, join(', ', @column)));
+	return Pdbc::Executable->new($self->{_db}, sprintf("CREATE TABLE %s (%s)", ref $entity, join(', ', @column)));
 }
 
 sub insert($self, $data) {
-	return Pdbc::Executable->new($self, sprintf("INSERT INTO %s %s", ref $data, &_create_sentence($data)));
+	return Pdbc::Executable->new($self->{_db}, sprintf("INSERT INTO %s %s", ref $data, &_create_sentence($data)));
 }
 
 sub _create_sentence($data) {

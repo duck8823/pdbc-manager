@@ -23,7 +23,7 @@ subtest 'create', sub {
 	$manager->drop(Test)->execute();
 	$manager->create(Test->new('INTEGER', 'TEXT'))->execute();
 
-	my $sth = $manager->{_connection}->prepare('PRAGMA TABLE_INFO(Test)');
+	my $sth = $manager->{_db}->prepare('PRAGMA TABLE_INFO(Test)');
 	$sth->execute();
 
 	my $table_info;
@@ -41,7 +41,7 @@ subtest 'drop', sub {
 
 	$manager->drop(Test)->execute();
 
-	my $sth = $manager->{_connection}->prepare('PRAGMA TABLE_INFO(Test)');
+	my $sth = $manager->{_db}->prepare('PRAGMA TABLE_INFO(Test)');
 	$sth->execute();
 	my $rows = $sth->fetchall_arrayref();
 	is scalar(@$rows), 0, 'should not exist table.';
@@ -56,7 +56,7 @@ subtest 'insert', sub {
 	$manager->insert(Test->new(2, 'name_2'))->execute();
 
 	my $expect = [{id => 1, name => 'name_1'}, {id => 2, name => 'name_2'}];
-	my $sth = $manager->{_connection}->prepare('SELECT * FROM Test');
+	my $sth = $manager->{_db}->prepare('SELECT * FROM Test');
 	$sth->execute();
 	my $actual = $sth->fetchall_arrayref(+{});
 	is_deeply $actual, $expect;

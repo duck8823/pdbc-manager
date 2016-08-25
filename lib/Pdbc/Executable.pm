@@ -7,16 +7,16 @@ use v5.19;
 use feature 'signatures';
 no warnings 'experimental::signatures';
 
-sub new($pkg, $manager, $sql) {
+sub new($pkg, $db, $sql) {
 	my $self = {
-		_manager => $manager,
+		_db => $db,
 		_sql     => $sql
 	};
 	return bless $self, $pkg;
 }
 
 sub execute($self) {
-	my $sth = $self->{_manager}->{_connection}->prepare($self->{_sql});
+	my $sth = $self->{_db}->prepare($self->{_sql});
 	$sth->execute();
 }
 
