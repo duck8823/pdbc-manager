@@ -7,47 +7,52 @@ use v5.19;
 use feature qw(signatures);
 no warnings qw(experimental::signatures);
 
-use Exporter;
-our (@ISA, @EXPORT);
-@ISA = qw(Exporter);
-@EXPORT = qw(EQUAL NOT_EQUAL LIKE);
+use Pdbc::Operator;
 
-sub new($pkg, $column, $value, $operator) {
-	my $self = {
+use Scalar::Util qw(blessed);
+
+sub new {
+	my ($pkg, $column, $value, $operator) = shift;
+	my $num_of_args = scalar @_;
+	if ($num_of_args == 0) {
+		#break
+	} elsif ($num_of_args == 2) {
+		($column, $operator) = @_;
+	} elsif ($num_of_args == 3) {
+		($column, $value, $operator) = @_;
+	} else {
+		die 'invalid argument number.';
+	}
+	if ((!defined $column && defined $operator) || (defined $column && !defined $operator) || (!defined $column && !defined $operator && defined $value)) {
+		die sprintf('invalid argument.');
+	}
+
+	if (defined $column && ref \$column ne 'SCALAR') {
+		die sprintf('column should be SCALAR: %s', ref \$column);
+	} elsif (defined $operator && (!defined blessed $operator || blessed $operator ne 'Pdbc::Operator')) {
+		die sprintf('operator should be Pdbc::Operator type: %s', $operator);
+	}
+
+	return bless {
 		column   => $column,
 		value    => $value,
 		operator => $operator
-	};
-	return bless $self, $pkg;
+	}, $pkg;
 }
 
-sub to_string($self) {
+sub to_clause($self) {
 	if (!defined $self->{column} && !defined $self->{value} && !defined $self->{operator}) {
 		return '';
-	} elsif (ref(\$self->{value}) ne 'SCALAR' || (defined $self->{column} && !defined $self->{value}) || (!defined $self->{column} && defined $self->{value})) {
-		die sprintf("error %s", $self);
 	}
 	my $value = $self->{value};
-	if($self->{operator} eq &LIKE) {
-		$value = '%' . $value . '%';
+	if (!$self->{operator}->has_value) {
+		return sprintf "WHERE %s %s", $self->{column}, $self->{operator};
+	} elsif($self->{operator} eq LIKE) {
+		$value = "'%$value%'";
+	} else {
+		$value = "'$value'";
 	}
-#	use Switch;
-#	switch ($self->{operator}) {
-#		case (&LIKE) {
-#			$value = '%'.$value.'%'
-#		}
-#	}
-	return sprintf "WHERE %s %s '%s'", $self->{column}, $self->{operator}, $value;
-}
-
-sub EQUAL {
-	return '='
-}
-sub NOT_EQUAL {
-	return '<>';
-}
-sub LIKE {
-	return 'LIKE';
+	return sprintf "WHERE %s %s %s", $self->{column}, $self->{operator}, $value;
 }
 
 

@@ -5,48 +5,44 @@ use Test::More;
 use Test::Exception;
 
 use Pdbc::Where;
+use Pdbc::Operator;
 
 subtest 'new', sub {
 	my $where = Pdbc::Where->new('id', 1, EQUAL);
 	isa_ok $where, 'Pdbc::Where';
 
-	my $actual = $where->to_string();
+	my $actual = $where->to_clause();
 	my $expect = "WHERE id = '1'";
 	is $actual, $expect;
 };
 
-subtest 'to_string', sub {
-	my $where;
-	$where = Pdbc::Where->new(undef, 1, EQUAL);
+subtest 'new', sub {
+	my $where = Pdbc::Where->new('id', 1, EQUAL);
+	isa_ok $where, 'Pdbc::Where';
+
 	dies_ok sub {
-		$where->to_string();
+		Pdbc::Where->new('id');
 	}, 'should die.';
 
-	$where = Pdbc::Where->new('id', undef, EQUAL);
 	dies_ok sub {
-		$where->to_string();
+		Pdbc::Where->new({}, 'value', EQUAL);
 	}, 'should die.';
 
-	$where = Pdbc::Where->new(undef, undef, EQUAL);
 	dies_ok sub {
-		$where->to_string();
+		Pdbc::Where->new(undef, undef, EQUAL);
 	}, 'should die.';
 
-	$where = Pdbc::Where->new('id', {}, EQUAL);
 	dies_ok sub {
-		$where->to_string();
+		Pdbc::Where->new('id', 1, '=');
 	}, 'should die.';
-
-	my $actual = Pdbc::Where->new('name', 'name', LIKE)->to_string();
-	my $expect = "WHERE name LIKE '%name%'";
-	is $actual, $expect;
 };
 
-subtest 'Operator', sub {
-	is EQUAL, '=';
-	is NOT_EQUAL, '<>';
-	is LIKE, 'LIKE';
-	is_deeply \@Pdbc::Where::EXPORT, ['EQUAL', 'NOT_EQUAL', 'LIKE'];
+subtest 'to_clause', sub {
+	my $actual = Pdbc::Where->new('name', 'name', LIKE)->to_clause();
+	is $actual, "WHERE name LIKE '%name%'";
+
+	$actual = Pdbc::Where->new('name', IS_NULL)->to_clause();
+	is $actual, 'WHERE name IS NULL';
 };
 
 done_testing();

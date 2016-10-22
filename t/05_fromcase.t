@@ -24,10 +24,6 @@ subtest 'list', sub {
 	is_deeply $actual->[0], $expect->[0];
 	is_deeply $actual->[1], $expect->[1];
 
-	dies_ok sub {
-		$manager->from(Test)->where(Pdbc::Where->new('id', {}, EQUAL))->list();
-	}, 'should die.';
-
 	my $not_exist = bless {
 		id => 'INTEGER'
 	}, 'NotExist';

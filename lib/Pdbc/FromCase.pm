@@ -26,7 +26,7 @@ sub where($self, $where) {
 
 sub list($self) {
 	my $results;
-	my $sth = $self->{_db}->prepare(sprintf("SELECT %s FROM %s %s", join(', ', @{$self->{_entity}}) , ref $self->{_entity}, $self->{_where}->to_string()));
+	my $sth = $self->{_db}->prepare(sprintf("SELECT %s FROM %s %s", join(', ', @{$self->{_entity}}) , ref $self->{_entity}, $self->{_where}->to_clause));
 	$sth->execute();
 	for my $result (@{$sth->fetchall_arrayref(+{})}) {
 		push @$results, bless($result, ref($self->{_entity}));
@@ -41,7 +41,7 @@ sub single_result($self) {
 }
 
 sub delete($self) {
-	return Pdbc::Executable->new($self->{_db}, sprintf("DELETE FROM %s %s", ref $self->{_entity}, $self->{_where}->to_string()));
+	return Pdbc::Executable->new($self->{_db}, sprintf("DELETE FROM %s %s", ref $self->{_entity}, $self->{_where}->to_clause()));
 }
 
 1;

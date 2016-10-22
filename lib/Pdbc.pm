@@ -10,11 +10,12 @@ no warnings 'experimental::signatures';
 use Exporter;
 our (@ISA, @EXPORT, @EXPORT_OK);
 @ISA = qw(Exporter);
-@EXPORT = qw(EQUAL NOT_EQUAL LIKE struct);
+@EXPORT = qw(EQUAL NOT_EQUAL LIKE IS_NULL IS_NOT_NULL struct);
 @EXPORT_OK = qw(connect);
 
 use Pdbc::Manager;
-use Pdbc::Where qw(EQUAL NOT_EQUAL LIKE);
+use Pdbc::Where;
+use Pdbc::Operator qw(EQUAL NOT_EQUAL LIKE IS_NULL IS_NOT_NULL);
 
 sub connect {
 	scalar @_ > 4 and die "too many arguments$!";
