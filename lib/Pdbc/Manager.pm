@@ -9,6 +9,7 @@ no warnings 'experimental::signatures';
 
 use DBI;
 use Pdbc::FromCase;
+use Pdbc::UpdateCase;
 use Pdbc::Executable;
 
 
@@ -40,10 +41,14 @@ sub create($self, $entity) {
 }
 
 sub insert($self, $data) {
-	return Pdbc::Executable->new($self->{_db}, sprintf("INSERT INTO %s %s", ref $data, &_create_sentence($data)));
+	return Pdbc::Executable->new($self->{_db}, sprintf("INSERT INTO %s %s", ref $data, &_create_insert_clause($data)));
 }
 
-sub _create_sentence($data) {
+sub update($self, $data) {
+	return Pdbc::Updatecase->new($self->{_db}, $data);
+}
+
+sub _create_insert_clause($data) {
 	my @column;
 	my @value;
 	for my $column (sort keys %$data) {

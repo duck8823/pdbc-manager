@@ -14,7 +14,7 @@ sub new($pkg, $db, $entity) {
 	my $self = {
 		_db		=> $db,
 		_entity	=> $entity,
-		_where	=> Pdbc::Where->new(undef, undef, undef)
+		_where	=> Pdbc::Where->new()
 	};
 	return bless $self, $pkg;
 }

@@ -63,11 +63,27 @@ subtest 'insert', sub {
 	is_deeply $actual, $expect;
 };
 
-subtest 'create_sentence', sub {
-	my $actual = Pdbc::Manager::_create_sentence(Test->new(1, 'name_1'));
+subtest 'update', sub {
+	my $manager = Pdbc::connect('SQLite', 'test.db');
+	$manager->drop(Test)->execute();
+	$manager->create(Test->new('INTEGER', 'TEXT'))->execute();
+
+	$manager->insert(Test->new(1, 'name_1'))->execute();
+	$manager->insert(Test->new(2, 'name_2'))->execute();
+	$manager->update(Test->new(3, 'name_3'))->where(Pdbc::Where->new('id', 1, EQUAL))->execute();
+
+	my $expect = [{id => 3, name => 'name_3'}, {id => 2, name => 'name_2'}];
+	my $sth = $manager->{_db}->prepare('SELECT * FROM Test');
+	$sth->execute();
+	my $actual = $sth->fetchall_arrayref(+{});
+	is_deeply $actual, $expect;
+};
+
+subtest 'create_insert_clause', sub {
+	my $actual = Pdbc::Manager::_create_insert_clause(Test->new(1, 'name_1'));
 	is $actual, "(id, name) VALUES ('1', 'name_1')";
 
-	$actual = Pdbc::Manager::_create_sentence(Test->new(2, undef));
+	$actual = Pdbc::Manager::_create_insert_clause(Test->new(2, undef));
 	is $actual, "(id, name) VALUES ('2', NULL)";
 };
 
