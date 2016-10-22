@@ -48,7 +48,7 @@ sub _create_sentence($data) {
 	my @value;
 	for my $column (sort keys %$data) {
 		push @column, $column;
-		push @value, sprintf("'%s'", defined $data->{$column} ? $data->{$column} : '');
+		push @value, defined $data->{$column} ? "'$data->{$column}'" : 'NULL';
 	}
 	return sprintf "(%s) VALUES (%s)", join(', ', @column), join(', ', @value);
 }

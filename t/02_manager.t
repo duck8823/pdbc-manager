@@ -54,8 +54,9 @@ subtest 'insert', sub {
 
 	$manager->insert(Test->new(1, 'name_1'))->execute();
 	$manager->insert(Test->new(2, 'name_2'))->execute();
+	$manager->insert(Test->new(3, undef))->execute();
 
-	my $expect = [{id => 1, name => 'name_1'}, {id => 2, name => 'name_2'}];
+	my $expect = [{id => 1, name => 'name_1'}, {id => 2, name => 'name_2'}, {id => 3, name => undef}];
 	my $sth = $manager->{_db}->prepare('SELECT * FROM Test');
 	$sth->execute();
 	my $actual = $sth->fetchall_arrayref(+{});
@@ -65,6 +66,9 @@ subtest 'insert', sub {
 subtest 'create_sentence', sub {
 	my $actual = Pdbc::Manager::_create_sentence(Test->new(1, 'name_1'));
 	is $actual, "(id, name) VALUES ('1', 'name_1')";
+
+	$actual = Pdbc::Manager::_create_sentence(Test->new(2, undef));
+	is $actual, "(id, name) VALUES ('2', NULL)";
 };
 
 done_testing();

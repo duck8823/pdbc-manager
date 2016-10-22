@@ -26,6 +26,7 @@ subtest 'readme', sub {
 	# データの挿入
 	$manager->insert(Hoge->new(1, 'name_1', 1))->execute();
 	$manager->insert(Hoge->new(2, 'name_2', 0))->execute();
+	$manager->insert(Hoge->new(3, undef, 0))->execute();
 	# データの取得（リスト）
 	my $rows = $manager->from(Hoge)->list();
 	for my $row ($rows) {
