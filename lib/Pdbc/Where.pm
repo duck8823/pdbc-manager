@@ -73,7 +73,7 @@ sub _to_phrase($self) {
 	} elsif(!$self->{operator}->has_value) {
 		$base = sprintf "%s %s", $self->{column}, $self->{operator};
 	} else {
-		my $value = $self->{operator} eq LIKE ? "'%$self->{value}%'" : "'$self->{value}'";
+		my $value = $self->{operator} eq LIKE() ? "'%$self->{value}%'" : "'$self->{value}'";
 		$base = sprintf "%s %s %s", $self->{column}, $self->{operator}, $value;
 	}
 	if (defined $self->{and}) {
