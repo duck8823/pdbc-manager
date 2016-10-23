@@ -56,5 +56,15 @@ my $delete_sql = $manager->from(Hoge)->where( Pdbc::Where->new( 'id', 1, EQUAL )
 my $drop_sql = $manager->drop(Hoge)->get_sql();
 ```
 
+## USAGE
+### Where
+条件の組み合わせ
+```perl
+Pdbc::Where->new('column_1', 'value_1', EQUAL)
+    ->and(Pdbc::Where->new('column_2', IS_NULL)
+        ->or(Pdbc::Where->new('column_2', 'value_2', LIKE)))
+    ->and(Pdbc::Where->new('column_3', 'value_3', EQUAL));
+```
+  
 ## License
 MIT License

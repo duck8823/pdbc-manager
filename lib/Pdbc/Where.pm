@@ -11,6 +11,11 @@ use Pdbc::Operator;
 
 use Scalar::Util qw(blessed);
 
+use overload (
+	q{""}    => \&to_clause,
+	fallback => 1,
+);
+
 sub new {
 	my ($pkg, $column, $value, $operator) = shift;
 	my $num_of_args = scalar @_;
@@ -40,20 +45,54 @@ sub new {
 	}, $pkg;
 }
 
-sub to_clause($self) {
-	if (!defined $self->{column} && !defined $self->{value} && !defined $self->{operator}) {
-		return '';
+sub and($self, $where) {
+	if (!defined blessed $where || blessed $where ne 'Pdbc::Where') {
+		die 'where should be instance of Pdbc::Where.';
 	}
-	my $value = $self->{value};
-	if (!$self->{operator}->has_value) {
-		return sprintf "WHERE %s %s", $self->{column}, $self->{operator};
-	} elsif($self->{operator} eq LIKE) {
-		$value = "'%$value%'";
-	} else {
-		$value = "'$value'";
-	}
-	return sprintf "WHERE %s %s %s", $self->{column}, $self->{operator}, $value;
+	push @{$self->{and}}, $where;
+	return $self;
 }
 
+sub or($self, $where) {
+	if (!defined blessed $where || blessed $where ne 'Pdbc::Where') {
+		die 'where should be instance of Pdbc::Where.';
+	}
+	push @{$self->{or}}, $where;
+	return $self;
+}
+
+sub to_clause($self) {
+	my $base = $self->_to_phrase;
+	return $base ? "WHERE $base" : '';
+}
+
+sub _to_phrase($self) {
+	my $base;
+	if (!defined $self->{column} && !defined $self->{value} && !defined $self->{operator}) {
+		$base = '';
+	} elsif(!$self->{operator}->has_value) {
+		$base = sprintf "%s %s", $self->{column}, $self->{operator};
+	} else {
+		my $value = $self->{operator} eq LIKE ? "'%$self->{value}%'" : "'$self->{value}'";
+		$base = sprintf "%s %s %s", $self->{column}, $self->{operator}, $value;
+	}
+	if (defined $self->{and}) {
+		my @and_clause = ();
+		for my $phrase (@{$self->{and}}) {
+			push @and_clause, $phrase->_to_phrase;
+		}
+		$base .= " AND " if ($base);
+		$base = "( $base". join(" AND ", @and_clause) . " )";
+	}
+	if (defined $self->{or}) {
+		my @or_clause = ();
+		for my $phrase (@{$self->{or}}) {
+			push @or_clause, $phrase->_to_phrase;
+		}
+		$base .= " OR " if ($base);
+		$base = "( $base" . join(" OR ", @or_clause) . " )";
+	}
+	return $base;
+}
 
 1;
