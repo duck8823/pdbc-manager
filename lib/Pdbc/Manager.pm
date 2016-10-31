@@ -48,6 +48,18 @@ sub update($self, $data) {
 	return Pdbc::Updatecase->new($self->{_db}, $data);
 }
 
+sub begin($self) {
+	$self->{_db}->begin_work;
+}
+
+sub commit($self) {
+	$self->{_db}->commit;
+}
+
+sub rollback($self) {
+	$self->{_db}->rollback;
+}
+
 sub _create_insert_clause($data) {
 	my @column;
 	my @value;
