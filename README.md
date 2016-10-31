@@ -9,7 +9,7 @@ blessしたリファレンスでデータベースを操作する
 ```sh
 git clone https://github.com/duck8823/pdbc-manager.git
 cd pdbc-manager
-cpan .
+cpanm .
 ```
   
 ## SYNOPSIS
@@ -57,6 +57,42 @@ my $drop_sql = $manager->drop(Hoge)->get_sql();
 ```
 
 ## USAGE
+### struct
+Python の namedtuple に似た書き方で、クラスを自動生成します.  
+```perl
+BEGIN {
+    struct 'Hoge', [ 'id, 'name', 'flg' ];
+}
+```
+は、以下のモジュールを自動的に生成します.  
+```
+package Hoge;
+
+use 5.019;
+use feature 'signatures';
+no warnings 'experimental::signatures';
+
+sub new($pkg, $id, $name, $flg) {
+    my $self = {
+        id => $id,
+        name => $name,
+        flg => $flg
+    };
+    return bless $self, ref($pkg) || $pkg;
+}
+1;
+```
+第一引数がパッケージ名（テーブル名）、第二引数がキー（カラム名）一覧となります.  
+  
+また、該当パッケージにサブルーチンを生成します.  
+```perl
+sub Test {
+	return bless [ 'id', 'name', 'flg' ], 'Hoge';
+}
+```
+from や drop の引数にこのサブルーチンを渡すことで簡潔に記述できます.  
+  
+  
 ### Where
 条件の組み合わせ
 ```perl
@@ -65,6 +101,25 @@ Pdbc::Where->new('column_1', 'value_1', EQUAL)
         ->or(Pdbc::Where->new('column_2', 'value_2', LIKE)))
     ->and(Pdbc::Where->new('column_3', 'value_3', EQUAL));
 ```
+上記で生成されるSQL
+```
+WHERE ( column_1 = 'value_1' AND ( column_2 IS NULL OR column_2 LIKE '%value_2%' ) AND column_3 = 'value_3' )
+```
   
+### Transaction
+デフォルトはオートコミットですが、トランザクションを制御することもできます.
+#### BEGIN TRANSACTION
+```perl
+$manager->begin;
+```
+#### COMMIT
+```perl
+$manager->commit;
+```
+#### ROLLBACK
+```perl
+$manager->rollback;
+```
+
 ## License
 MIT License
