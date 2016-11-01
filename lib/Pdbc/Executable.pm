@@ -9,15 +9,14 @@ no warnings 'experimental::signatures';
 
 sub new($pkg, $db, $sql) {
 	my $self = {
-		_db => $db,
-		_sql     => $sql
+		_db  => $db,
+		_sql => $sql
 	};
 	return bless $self, $pkg;
 }
 
 sub execute($self) {
-	my $sth = $self->{_db}->prepare($self->{_sql});
-	$sth->execute();
+	$self->{_db}->do($self->{_sql}) or die ($self->{_db}->errstr . "\nERROR SQL STATEMENT: " . $self->{_sql});
 }
 
 sub get_sql($self) {
