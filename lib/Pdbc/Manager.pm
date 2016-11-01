@@ -61,11 +61,17 @@ sub rollback($self) {
 }
 
 sub _create_insert_clause($data) {
-	my @column;
-	my @value;
+	my (@column, @value);
 	for my $column (sort keys %$data) {
 		push @column, $column;
-		push @value, defined $data->{$column} ? "'$data->{$column}'" : 'NULL';
+		my $value;
+		if (defined $data->{$column}) {
+			($value = $data->{$column}) =~ s/'/''/g;
+			$value = "'$value'";
+		} else {
+			$value = 'NULL';
+		}
+		push @value, $value;
 	}
 	return sprintf "(%s) VALUES (%s)", join(', ', @column), join(', ', @value);
 }

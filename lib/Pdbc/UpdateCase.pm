@@ -27,7 +27,14 @@ sub where($self, $where) {
 sub _create_update_clause($data) {
 	my @set;
 	for my $column (sort keys %$data) {
-		push(@set, sprintf "%s = %s", $column, defined $data->{$column} ? "'$data->{$column}'" : 'NULL');
+		my $value;
+		if (defined $data->{$column}) {
+			($value = $data->{$column}) =~ s/'/''/g;
+			$value = "'$value'";
+		} else {
+			$value = 'NULL';
+		}
+		push(@set, sprintf "%s = %s", $column, $value);
 	}
 	return join(', ', @set);
 }

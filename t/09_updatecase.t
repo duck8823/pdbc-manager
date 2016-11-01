@@ -33,6 +33,9 @@ subtest 'create_update_clause', sub {
 
 	$actual = Pdbc::Updatecase::_create_update_clause(Test->new(2, undef));
 	is $actual, "id = '2', name = NULL";
+
+	$actual = Pdbc::Updatecase::_create_update_clause(Test->new(3, "ho'ge"));
+	is $actual, "id = '3', name = 'ho''ge'";
 };
 
 done_testing();

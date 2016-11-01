@@ -85,6 +85,9 @@ subtest 'create_insert_clause', sub {
 
 	$actual = Pdbc::Manager::_create_insert_clause(Test->new(2, undef));
 	is $actual, "(id, name) VALUES ('2', NULL)";
+
+	$actual = Pdbc::Manager::_create_insert_clause(Test->new(3, "ho'ge"));
+	is $actual, "(id, name) VALUES ('3', 'ho''ge')";
 };
 
 done_testing();
