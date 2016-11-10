@@ -9,6 +9,15 @@ use 5.019;
 use Pdbc;
 use Data::Dumper;
 
+my $manager;
+eval {
+	# データベースへの接続
+	$manager = Pdbc::connect('Pg', 'dbname=test;host=localhost', "postgres");
+};
+if($@){
+	plan skip_all => 'Test relevant with PostgreSQL';
+};
+
 subtest 'readme', sub {
 	lives_ok {
 	my $dummy = Pdbc::connect('Pg', 'dbname=test;host=localhost', "postgres");
@@ -19,8 +28,6 @@ subtest 'readme', sub {
 		struct 'Hoge', [ 'id', 'name', 'flg' ];
 	}
 
-	# データベースへの接続
-	my $manager = Pdbc::connect('Pg', 'dbname=test;host=localhost', "postgres");
 	# テーブルの作成
 	$manager->create(Hoge->new('INTEGER', 'TEXT', 'BOOLEAN'))->execute();
 	# データの挿入

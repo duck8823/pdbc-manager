@@ -7,10 +7,15 @@ use Test::Exception;
 use Pdbc;
 use v5.19;
 
+my $manager;
+eval {
+	$manager = Pdbc::connect('Pg', 'dbname=test;host=localhost', "postgres");
+};
+if($@){
+	plan skip_all => 'Test relevant with PostgreSQL';
+};
 
 subtest 'readme', sub {
-	my $manager = Pdbc::connect("Pg", "dbname=test;host=localhost", "postgres");
-
 	BEGIN {
 		struct 'Hoge', ['id', 'name', 'flg'];
 	}

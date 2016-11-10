@@ -15,7 +15,7 @@ use Pdbc::Executable;
 
 sub new {
 	my ($pkg, $driver, $datasource, $user, $password) = @_;
-	my $db = DBI->connect("dbi:$driver:$datasource", $user, $password) or die $!;
+	my $db = DBI->connect("dbi:$driver:$datasource", $user, $password, { PrintError => 0 }) or die DBI::errstr;
 	my $self = {
 		_db => $db
 	};
