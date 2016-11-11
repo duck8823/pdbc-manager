@@ -65,7 +65,7 @@ BEGIN {
 }
 ```
 は、以下のモジュールを自動的に生成します.  
-```
+```perl
 package Hoge;
 
 use 5.019;
@@ -102,7 +102,7 @@ Pdbc::Where->new('column_1', 'value_1', EQUAL)
     ->and(Pdbc::Where->new('column_3', 'value_3', EQUAL));
 ```
 上記で生成されるSQL
-```
+```sql
 WHERE ( column_1 = 'value_1' AND ( column_2 IS NULL OR column_2 LIKE '%value_2%' ) AND column_3 = 'value_3' )
 ```
   
