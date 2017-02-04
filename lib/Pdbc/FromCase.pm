@@ -25,7 +25,7 @@ sub where($self, $where) {
 }
 
 sub list($self) {
-	my $results;
+	my $results = [];
 	my $sth = $self->{_db}->prepare(sprintf("SELECT %s FROM %s %s", join(', ', @{$self->{_entity}}) , ref $self->{_entity}, $self->{_where}->to_clause));
 	$sth->execute();
 	for my $result (@{$sth->fetchall_arrayref(+{})}) {
@@ -37,7 +37,7 @@ sub list($self) {
 sub single_result($self) {
 	my $result = $self->list();
 	scalar @$result > 1 and die '結果が一意でありません.';
-	return $result->[0];
+	return scalar @$result == 0 ? undef : $result->[0];
 }
 
 sub delete($self) {

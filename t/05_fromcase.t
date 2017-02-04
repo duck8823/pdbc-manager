@@ -24,6 +24,8 @@ subtest 'list', sub {
 	is_deeply $actual->[0], $expect->[0];
 	is_deeply $actual->[1], $expect->[1];
 
+	is scalar(@{$manager->from(Test)->where(Pdbc::Where->new('id', 4, EQUAL))->list}), 0;
+
 	my $not_exist = bless {
 		id => 'INTEGER'
 	}, 'NotExist';
@@ -43,10 +45,12 @@ subtest 'single_result', sub {
 
 	my $actual = $manager->from(Test)->where(Pdbc::Where->new('id', 1, EQUAL))->single_result();
 	my $expect = {id => 1, name => 'name_1'};
-	is_deeply$actual, $expect;
+	is_deeply $actual, $expect;
+
+	is $manager->from(Test)->where(Pdbc::Where->new('id', 3, EQUAL))->single_result(), undef;
 
 	dies_ok sub {
-		$manager->from(Test)->where(Pdbc::Where->new('id', {}, EQUAL))->single_result();
+		$manager->from(bless ['id'],'NotFound')->single_result();
 	}, 'should die.';
 
 	dies_ok sub {
