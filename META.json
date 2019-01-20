@@ -21,9 +21,7 @@
   "prereqs" : {
 	"configure" : {
 	  "requires" : {
-		"Module::Build" : "0.4220",
-		"DBD::SQLite" : "1.50",
-		"DBD::Pg" : "3.5.3"
+		"Module::Build::Tiny" : "0.035"
 	  }
 	},
 	"runtime" : {
@@ -35,8 +33,10 @@
 	},
 	"test" : {
 	  "requires" : {
+		"Test::Exception" : "0",
 		"Test::More" : "0.98",
-		"Test::Exception" : "0.43"
+		"DBD::SQLite" : "1.50",
+		"DBD::Pg" : "3.5.3"
 	  }
 	}
   },
