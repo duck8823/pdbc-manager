@@ -7,9 +7,7 @@ blessしたリファレンスでデータベースを操作する
   
 ## INSTALL
 ```sh
-git clone https://github.com/duck8823/pdbc-manager.git
-cd pdbc-manager
-cpanm .
+cpanm https://github.com/duck8823/pdbc-manager/tarball/master
 ```
   
 ## SYNOPSIS
